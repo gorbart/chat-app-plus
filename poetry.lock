@@ -66,6 +66,14 @@ django = ">=3.0"
 pytz = "*"
 
 [[package]]
+name = "psycopg2"
+version = "2.9.5"
+description = "psycopg2 - Python-PostgreSQL Database Adapter"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[[package]]
 name = "python-dotenv"
 version = "0.21.1"
 description = "Read key-value pairs from a .env file and set them as environment variables"
@@ -111,7 +119,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "e0e0b1d45f7d195b169d762973f020e47bf3ff5566ac09c6cb32227961aea756"
+content-hash = "17f54830a8c7f013429843ad7292cdc8221d5a2c8cef48d3d5ba2fdf7e208595"
 
 [metadata.files]
 asgiref = []
@@ -119,6 +127,7 @@ channels = []
 django = []
 django-rest-framework = []
 djangorestframework = []
+psycopg2 = []
 python-dotenv = []
 pytz = []
 sqlparse = []
