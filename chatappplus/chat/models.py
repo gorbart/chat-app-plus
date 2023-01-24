@@ -8,6 +8,9 @@ class Chatroom(models.Model):
   name = models.CharField(max_length=255)
   users = models.ManyToManyField(User, related_name='chatrooms')
 
+  def __str__(self) -> str:
+    return self.name
+
 
 class Message(models.Model):
   text = models.TextField()
@@ -17,3 +20,6 @@ class Message(models.Model):
       User, on_delete=models.CASCADE, related_name='sent_messages')
   chatroom = models.ForeignKey(
       Chatroom, on_delete=models.CASCADE, related_name='messages')
+
+  def __str__(self) -> str:
+    return self.author.get_username() + ': ' + self.text
