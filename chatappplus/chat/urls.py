@@ -1,5 +1,9 @@
-from django.urls import path, include
+from rest_framework import routers
 
-urlpatterns = [
-    path('', include('chat.urls')),
-]
+from chat.views import ChatroomViewSet, MessageViewSet, UserViewSet
+
+router = routers.SimpleRouter()
+router.register(r'users', UserViewSet)
+router.register(r'chatrooms', ChatroomViewSet)
+router.register(r'messages', MessageViewSet)
+urlpatterns = router.urls

@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from chatappplus.chat.models import Chatroom, Message
+from chat.models import Chatroom, Message
 
 User = get_user_model()
 
@@ -10,7 +10,7 @@ class UserSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = User
-    exclude = ('chatrooms', 'sent_messages')
+    fields = '__all__'
 
 
 class MessageSerializer(serializers.ModelSerializer):
