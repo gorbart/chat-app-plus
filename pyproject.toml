@@ -11,6 +11,8 @@ channels = "^4.0.0"
 yapf = "^0.32.0"
 python-dotenv = "^0.21.1"
 psycopg2 = "^2.9.5"
+djangorestframework-simplejwt = "^5.2.2"
+django-filter = "^22.1"
 
 [tool.poetry.dev-dependencies]
 

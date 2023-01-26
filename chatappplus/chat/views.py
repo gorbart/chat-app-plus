@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
-from rest_framework import mixins, viewsets
+from django.core.exceptions import BadRequest
+from rest_framework import viewsets
 
 from chat.models import Message, Chatroom
 from chat.serializers import (MessageSerializer, ChatroomSerializer,
@@ -28,6 +29,9 @@ class MessageViewSet(CreateListViewSet):
 
   def get_queryset(self):
     chatroom_id = self.request.query_params.get('chatroom_id')
+
+    if chatroom_id is None:
+      raise BadRequest()
 
     queryset = Message.objects.filter(
         chatroom__id=chatroom_id).order_by('-sent_at')

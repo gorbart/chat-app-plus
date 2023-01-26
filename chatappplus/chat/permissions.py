@@ -1,3 +1,4 @@
+from django.core.exceptions import BadRequest
 from rest_framework import permissions
 
 from chat.models import Chatroom
@@ -30,6 +31,9 @@ class ChatroomMemberOrAdmin(permissions.BasePermission):
 
   def has_permission(self, request, view):
     chatroom_id = request.query_params.get('chatroom_id')
+
+    if chatroom_id is None:
+      raise BadRequest()
 
     chatroom = Chatroom.objects.get(id=chatroom_id)
     if request.user.is_staff == True or request.user in chatroom.users.all():
