@@ -5,6 +5,7 @@ from chat.models import Message, Chatroom
 from chat.serializers import (MessageSerializer, ChatroomSerializer,
                               UserSerializer)
 from chat.permissions import (ChatroomMemberOrAdmin, MemberOrAdmin, SelfOrAdmin)
+from chat.viewsets import CreateListViewSet
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -17,14 +18,20 @@ class UserViewSet(viewsets.ModelViewSet):
   permission_classes = [SelfOrAdmin]
 
 
-class MessageViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+class MessageViewSet(CreateListViewSet):
   """
   API endpoint that allows chat messages to be viewed or edited.
   """
-  queryset = Message.objects.all().order_by('-sent_at')
   serializer_class = MessageSerializer
 
   permission_classes = [ChatroomMemberOrAdmin]
+
+  def get_queryset(self):
+    chatroom_id = self.request.query_params.get('chatroom_id')
+
+    queryset = Message.objects.filter(
+        chatroom__id=chatroom_id).order_by('-sent_at')
+    return queryset
 
 
 class ChatroomViewSet(viewsets.ModelViewSet):
