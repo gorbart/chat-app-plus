@@ -1,10 +1,9 @@
 from django import forms
 from django.contrib import admin
-from django.contrib.admin.widgets import AdminSplitDateTime
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User, Group
 
-from chat.models import Chatroom, Message
+from chat.models import Chatroom, Message, UserMessage
 
 
 class UserAdmin(UserAdmin):
@@ -33,22 +32,31 @@ admin.site.unregister(Group)
 admin.site.register(Chatroom)
 
 
+class MessageInline(admin.TabularInline):
+  model = UserMessage
+  extra = 1
+
+
 class MessageForm(forms.ModelForm):
 
   class Meta:
     model = Message
-    fields = ('text', 'read_at', 'author', 'chatroom')
+    fields = (
+        'text',
+        'author',
+        'chatroom',
+    )
     widgets = {
-        'read_at': AdminSplitDateTime(),
         'author': forms.Select(),
         'chatroom': forms.Select(),
     }
 
 
 class MessageAdmin(admin.ModelAdmin):
-  list_display = ('text', 'author', 'sent_at', 'read_at')
-  readonly_fields = ['sent_at']
+  list_display = ('text', 'author', 'sent_at')
+  readonly_fields = ['sent_at', 'id']
   form = MessageForm
+  inlines = (MessageInline,)
 
 
 admin.site.register(Message, MessageAdmin)

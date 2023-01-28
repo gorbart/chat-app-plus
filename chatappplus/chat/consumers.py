@@ -1,29 +1,49 @@
+from asgiref.sync import sync_to_async
 from datetime import datetime, timezone
 import json
-from asgiref.sync import sync_to_async
+from typing import List
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.exceptions import DenyConnection
-from chat.models import Chatroom, Message
+
+from chat.models import Chatroom, Message, UserMessage
+from chat.serializers import MessageSerializer
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
 
   async def connect(self):
-    chatroom: Chatroom = await sync_to_async(Chatroom.objects.get)(
+    self.chatroom: Chatroom = await sync_to_async(Chatroom.objects.get)(
         id=self.scope["url_route"]["kwargs"]["chatroom_id"])
 
     self.user = self.scope["user"]
 
-    self.room_name = chatroom.name + "_" + str(chatroom.id)
+    self.room_name = self.chatroom.name + "_" + str(self.chatroom.id)
     self.room_group_name = "chat_" + self.room_name
 
-    if await sync_to_async(self.check_if_user_in_chatroom)(chatroom) == False:
+    if await sync_to_async(self.check_if_user_in_chatroom)(self.chatroom
+                                                          ) == False:
       raise DenyConnection("User is not in chatroom")
 
     await self.channel_layer.group_add(self.room_group_name, self.channel_name)
 
     await self.accept()
+
+    messages = await sync_to_async(self.get_last_50_messages)(self.chatroom)
+    await self.send(
+        json.dumps({
+            "type":
+                "last_50_messages",
+            "messages": (await sync_to_async(self.serialize_messages)
+                         (messages)),
+        }))
+
+  def get_last_50_messages(self, chatroom: Chatroom) -> List[Message]:
+    messages = chatroom.messages.all().order_by('-sent_at')[:50]
+    return messages
+
+  def serialize_messages(self, messages: List[Message]) -> List[dict]:
+    return MessageSerializer(messages, many=True).data
 
   def check_if_user_in_chatroom(self, chatroom: Chatroom) -> bool:
     users = chatroom.users.all()
@@ -44,20 +64,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
     })
 
   async def chat_message(self, event: dict):
-    message: str = event["message"]
+    message_text: str = event["message"]
 
-    chatroom_id: int = int(self.room_name.split("_")[-1])
+    chatroom_id: int = self.chatroom.id
 
-    await sync_to_async(Message.objects.create
-                       )(text=message,
-                         sent_at=datetime.now(timezone.utc),
-                         author=self.scope["user"],
-                         chatroom=await sync_to_async(Chatroom.objects.get)
-                         (id=chatroom_id))
+    message: Message = await sync_to_async(Message.objects.create
+                                          )(text=message_text,
+                                            sent_at=datetime.now(timezone.utc),
+                                            author=self.scope["user"],
+                                            chatroom=await
+                                            sync_to_async(Chatroom.objects.get)
+                                            (id=chatroom_id))
 
     await self.send(
         text_data=json.dumps({
-            "message": message,
-            "author": self.user.username,
-            "sent_at": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+            "message": message.text,
+            "author": message.author.username,
+            "sent_at": message.sent_at
         }))
