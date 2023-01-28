@@ -26,12 +26,12 @@ SECRET_KEY = 'django-insecure-vhkn9nn9^i=&nn@9$o*&ma#0s%hw7!$182zn2=s0@n76snp_&x
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin', 'django.contrib.auth',
+    'daphne', 'django.contrib.admin', 'django.contrib.auth',
     'django.contrib.contenttypes', 'django.contrib.sessions',
     'django.contrib.messages', 'django.contrib.staticfiles', 'channels', 'chat'
 ]
@@ -47,6 +47,15 @@ MIDDLEWARE = [
 ]
 
 ASGI_APPLICATION = 'chatappplus.asgi.application'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [(os.getenv("REDIS_HOST"), os.getenv("REDIS_PORT"))],
+        },
+    },
+}
 
 ROOT_URLCONF = 'chatappplus.urls'
 
