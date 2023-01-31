@@ -1,0 +1,30 @@
+version: "3.8"
+services:
+  redis:
+    image: redis
+    command: redis-server
+    ports:
+      - "127.0.0.1:63790:6379"
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DB=${DATABASE_NAME}
+    ports:
+      - "127.0.0.1:54320:5432"
+  web:
+    build: .
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "127.0.0.1:8000:5000"
+    volumes:
+      - ./chatappplus:/code
+    links:
+      - db
+      - redis
+    depends_on:
+      - db
+      - redis
